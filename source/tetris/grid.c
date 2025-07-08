@@ -9,19 +9,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-TetrisGrid_s TetrisGrid_new (int w, int h) {
-	TetrisGrid_s grid;
+TetrisGrid TetrisGrid_new (int w, int h) {
+	TetrisGrid grid;
 	TetrisGrid_init(&grid, w, h);
 	return grid;
 }
 
-void TetrisGrid_init (TetrisGrid_s* grid, int w, int h) {
-	grid->blocks = calloc(w * h, sizeof(TetrisBlock_s));
+void TetrisGrid_init (TetrisGrid* grid, int w, int h) {
+	grid->blocks = calloc(w * h, sizeof(TetrisBlock));
 	grid->width = w;
 	grid->height = h;
 }
 
-void TetrisGrid_free (TetrisGrid_s* grid) {
+void TetrisGrid_free (TetrisGrid* grid) {
 	free(grid->blocks);
 
 	grid->blocks = NULL;
@@ -29,26 +29,26 @@ void TetrisGrid_free (TetrisGrid_s* grid) {
 	grid->height = 0;
 }
 
-TetrisBlock_s TetrisGrid_get (TetrisGrid_s* grid, int x, int y) {
+TetrisBlock TetrisGrid_get (TetrisGrid* grid, int x, int y) {
 	return grid->blocks[x + y * grid->width];
 }
 
-void TetrisGrid_set (TetrisGrid_s* grid, int x, int y, TetrisBlock_s block) {
+void TetrisGrid_set (TetrisGrid* grid, int x, int y, TetrisBlock block) {
 	grid->blocks[x + y * grid->width] = block;
 }
 
-void TetrisGrid_clear (TetrisGrid_s* grid) {
-	memset(grid->blocks, 0, 8 * 16 * sizeof(TetrisBlock_s));
+void TetrisGrid_clear (TetrisGrid* grid) {
+	memset(grid->blocks, 0, 8 * 16 * sizeof(TetrisBlock));
 }
 
-void TetrisGrid_processLines (TetrisGrid_s* grid, int* score) {
+void TetrisGrid_processLines (TetrisGrid* grid, int* score) {
 	int scoreAdd = 0;
 	TetrisGrid_emptyLines(grid, &scoreAdd);
 	TetrisGrid_fallLines(grid);
 	*score += scoreAdd;
 }
 
-void TetrisGrid_fallLines (TetrisGrid_s* grid) {
+void TetrisGrid_fallLines (TetrisGrid* grid) {
 	for (int row = 0; row < grid->height; row++) {
 		int emptyInRow = 0;
 
@@ -59,16 +59,16 @@ void TetrisGrid_fallLines (TetrisGrid_s* grid) {
 		}
 
 		if (emptyInRow == grid->width) {
-			TetrisBlock_s* copyDest = &grid->blocks[1 * grid->width];
-			TetrisBlock_s* copySrc = &grid->blocks[0];
-			int copySize = row * grid->width * sizeof(TetrisBlock_s);
+			TetrisBlock* copyDest = &grid->blocks[1 * grid->width];
+			TetrisBlock* copySrc = &grid->blocks[0];
+			int copySize = row * grid->width * sizeof(TetrisBlock);
 			memcpy(copyDest, copySrc, copySize);
-			memset(copySrc, 0, grid->width * sizeof(TetrisBlock_s));
+			memset(copySrc, 0, grid->width * sizeof(TetrisBlock));
 		}
 	}
 }
 
-void TetrisGrid_emptyLines (TetrisGrid_s* grid, int* score) {
+void TetrisGrid_emptyLines (TetrisGrid* grid, int* score) {
 	int linesCleared = 0;
 
 	for (int row = 0; row < grid->height; row++) {
@@ -102,9 +102,9 @@ void TetrisGrid_emptyLines (TetrisGrid_s* grid, int* score) {
 	}
 }
 
-void TetrisGrid_render (TetrisGrid_s* grid) {
+void TetrisGrid_render (TetrisGrid* grid) {
 	for (int i = 0; i < grid->width * grid->height; i++) {
-		TetrisBlock_s block = grid->blocks[i];
+		TetrisBlock block = grid->blocks[i];
 		
 		     if (block.color == 0) SDL_SetRenderDrawColor(sdlRender, 0, 0, 0, 255);
 		else if (block.color == 1) SDL_SetRenderDrawColor(sdlRender, 255, 0, 0, 255);

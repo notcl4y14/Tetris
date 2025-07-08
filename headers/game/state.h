@@ -5,14 +5,14 @@
 
 #define GAME_FPS_TARGET 60
 
-typedef struct GameState_s {
+typedef struct GameState {
 	bool shouldQuit;
 	bool isPaused;
 	int32 tickCount;
-} GameState_s;
+} GameState;
 
-GameState_s GameState_new ();
-void GameState_init (GameState_s* state);
-void GameState_free (GameState_s* state);
+GameState GameState_new ();
+void GameState_init (GameState* state);
+void GameState_free (GameState* state);
 
 #endif

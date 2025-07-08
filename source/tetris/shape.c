@@ -9,21 +9,21 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-TetrisShape_s TetrisShape_new () {
-	TetrisShape_s shape;
+TetrisShape TetrisShape_new () {
+	TetrisShape shape;
 	TetrisShape_init(&shape);
 	return shape;
 }
 
-void TetrisShape_init (TetrisShape_s* shape) {
-	shape->blocks = calloc(TETRIS_SHAPE_BLOCK_AMOUNT, sizeof(TetrisShapeBlock_s));
+void TetrisShape_init (TetrisShape* shape) {
+	shape->blocks = calloc(TETRIS_SHAPE_BLOCK_AMOUNT, sizeof(TetrisShapeBlock));
 	shape->x = 0;
 	shape->y = 0;
 	shape->type = 0;
 	shape->color = 0;
 }
 
-void TetrisShape_free (TetrisShape_s* shape) {
+void TetrisShape_free (TetrisShape* shape) {
 	free(shape->blocks);
 	
 	shape->blocks = NULL;
@@ -33,25 +33,25 @@ void TetrisShape_free (TetrisShape_s* shape) {
 	shape->color = 0;
 }
 
-void TetrisShape_rotateCW_base (TetrisShape_s* shape) {
+void TetrisShape_rotateCW_base (TetrisShape* shape) {
 	for (int i = 0; i < TETRIS_SHAPE_BLOCK_AMOUNT; i++) {
-		TetrisShapeBlock_s* shapeBlock = &shape->blocks[i];
+		TetrisShapeBlock* shapeBlock = &shape->blocks[i];
 		int prevX = shapeBlock->x;
 		shapeBlock->x = -shapeBlock->y;
 		shapeBlock->y = prevX;
 	}
 }
 
-void TetrisShape_rotateCCW_base (TetrisShape_s* shape) {
+void TetrisShape_rotateCCW_base (TetrisShape* shape) {
 	for (int i = 0; i < TETRIS_SHAPE_BLOCK_AMOUNT; i++) {
-		TetrisShapeBlock_s* shapeBlock = &shape->blocks[i];
+		TetrisShapeBlock* shapeBlock = &shape->blocks[i];
 		int prevX = shapeBlock->x;
 		shapeBlock->x = shapeBlock->y;
 		shapeBlock->y = -prevX;
 	}
 }
 
-void TetrisShape_rotateCW (TetrisShape_s* shape) {
+void TetrisShape_rotateCW (TetrisShape* shape) {
 	if (shape->type == TETRIS_SHAPE_TYPE_O) {
 		return;
 	}
@@ -59,7 +59,7 @@ void TetrisShape_rotateCW (TetrisShape_s* shape) {
 	TetrisShape_rotateCW_base(shape);
 }
 
-void TetrisShape_rotateCCW (TetrisShape_s* shape) {
+void TetrisShape_rotateCCW (TetrisShape* shape) {
 	if (shape->type == TETRIS_SHAPE_TYPE_O) {
 		return;
 	}
@@ -67,9 +67,9 @@ void TetrisShape_rotateCCW (TetrisShape_s* shape) {
 	TetrisShape_rotateCCW_base(shape);
 }
 
-char TetrisShape_collides (TetrisShape_s* shape, TetrisGrid_s* grid, int offsetX, int offsetY) {
+char TetrisShape_collides (TetrisShape* shape, TetrisGrid* grid, int offsetX, int offsetY) {
 	for (int i = 0; i < TETRIS_SHAPE_BLOCK_AMOUNT; i++) {
-		TetrisShapeBlock_s shapeBlock = shape->blocks[i];
+		TetrisShapeBlock shapeBlock = shape->blocks[i];
 
 		int realBlockX = shape->x + shapeBlock.x + offsetX;
 		int realBlockY = shape->y + shapeBlock.y + offsetY;
@@ -80,7 +80,7 @@ char TetrisShape_collides (TetrisShape_s* shape, TetrisGrid_s* grid, int offsetX
 			return 1;
 		}
 
-		TetrisBlock_s gridBlock = TetrisGrid_get(grid, realBlockX, realBlockY);
+		TetrisBlock gridBlock = TetrisGrid_get(grid, realBlockX, realBlockY);
 
 		if (gridBlock.color != 0) {
 			return 1;
@@ -90,17 +90,17 @@ char TetrisShape_collides (TetrisShape_s* shape, TetrisGrid_s* grid, int offsetX
 	return 0;
 }
 
-void TetrisShape_applyToGrid (TetrisShape_s* shape, TetrisGrid_s* grid) {
+void TetrisShape_applyToGrid (TetrisShape* shape, TetrisGrid* grid) {
 	for (int i = 0; i < TETRIS_SHAPE_BLOCK_AMOUNT; i++) {
-		TetrisShapeBlock_s block = shape->blocks[i];
+		TetrisShapeBlock block = shape->blocks[i];
 		
-		TetrisGrid_set(grid, shape->x + block.x, shape->y + block.y, (TetrisBlock_s) {shape->color});
+		TetrisGrid_set(grid, shape->x + block.x, shape->y + block.y, (TetrisBlock) {shape->color});
 	}
 }
 
-void TetrisShape_render (TetrisShape_s* shape) {
+void TetrisShape_render (TetrisShape* shape) {
 	for (int i = 0; i < TETRIS_SHAPE_BLOCK_AMOUNT; i++) {
-		TetrisShapeBlock_s block = shape->blocks[i];
+		TetrisShapeBlock block = shape->blocks[i];
 		
 		     if (shape->color == 0) SDL_SetRenderDrawColor(sdlRender, 0, 0, 0, 255);
 		else if (shape->color == 1) SDL_SetRenderDrawColor(sdlRender, 255, 0, 0, 255);

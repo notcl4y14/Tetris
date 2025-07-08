@@ -14,24 +14,24 @@
 #include <game/tetris/block.h>
 #include <game/tetris/grid.h>
 
-typedef struct TetrisShapeBlock_s {
+typedef struct TetrisShapeBlock {
 	int x, y;
-} TetrisShapeBlock_s;
+} TetrisShapeBlock;
 
-typedef struct TetrisShape_s {
-	TetrisShapeBlock_s* blocks;
+typedef struct TetrisShape {
+	TetrisShapeBlock* blocks;
 	int x, y;
 	char type;
 	char color;
-} TetrisShape_s;
+} TetrisShape;
 
-TetrisShape_s TetrisShape_new ();
-void TetrisShape_init (TetrisShape_s* shape);
-void TetrisShape_free (TetrisShape_s* shape);
-void TetrisShape_rotateCW (TetrisShape_s* shape);
-void TetrisShape_rotateCCW (TetrisShape_s* shape);
-char TetrisShape_collides (TetrisShape_s* shape, TetrisGrid_s* grid, int offsetX, int offsetY);
-void TetrisShape_applyToGrid (TetrisShape_s* shape, TetrisGrid_s* grid);
-void TetrisShape_render (TetrisShape_s* shape);
+TetrisShape TetrisShape_new ();
+void TetrisShape_init (TetrisShape* shape);
+void TetrisShape_free (TetrisShape* shape);
+void TetrisShape_rotateCW (TetrisShape* shape);
+void TetrisShape_rotateCCW (TetrisShape* shape);
+char TetrisShape_collides (TetrisShape* shape, TetrisGrid* grid, int offsetX, int offsetY);
+void TetrisShape_applyToGrid (TetrisShape* shape, TetrisGrid* grid);
+void TetrisShape_render (TetrisShape* shape);
 
 #endif

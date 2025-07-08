@@ -11,24 +11,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-TetrisState_s TetrisState_new () {
-	TetrisState_s state;
+TetrisState TetrisState_new () {
+	TetrisState state;
 	TetrisState_init(&state);
 	return state;
 }
 
-void TetrisState_init (TetrisState_s* state) {
+void TetrisState_init (TetrisState* state) {
 	state->grid = TetrisGrid_new(TETRIS_GRID_WIDTH, TETRIS_GRID_HEIGHT);
-	state->shape = TetrisShape_new();
+	state->currentShape = TetrisShape_new();
 	state->isPlaying = 0;
 	state->isOver = 0;
 	state->score = 0;
 	state->highScore = 0;
 }
 
-void TetrisState_free (TetrisState_s* state) {
+void TetrisState_free (TetrisState* state) {
 	TetrisGrid_free(&state->grid);
-	TetrisShape_free(&state->shape);
+	TetrisShape_free(&state->currentShape);
 
 	state->isPlaying = 0;
 	state->isOver = 0;
@@ -36,17 +36,17 @@ void TetrisState_free (TetrisState_s* state) {
 	state->highScore = 0;
 }
 
-void TetrisState_start (TetrisState_s* state) {
+void TetrisState_start (TetrisState* state) {
 	TetrisGrid_clear(&state->grid);
 	char shapeType = rand() % 7;
 	TetrisState_changeShape(state, shapeType);
-	state->shape.x = 3;
+	state->currentShape.x = 3;
 	state->isPlaying = 1;
 	state->isOver = 0;
 	state->score = 0;
 }
 
-void TetrisState_stop (TetrisState_s* state) {
+void TetrisState_stop (TetrisState* state) {
 	state->isPlaying = 0;
 	state->isOver = 1;
 
@@ -56,132 +56,130 @@ void TetrisState_stop (TetrisState_s* state) {
 	}
 }
 
-void TetrisState_moveLeft (TetrisState_s* state) {
+void TetrisState_moveLeft (TetrisState* state) {
 	for (int i = 0; i < TETRIS_SHAPE_BLOCK_AMOUNT; i++) {
-		TetrisShapeBlock_s shapeBlock = state->shape.blocks[i];
+		TetrisShapeBlock shapeBlock = state->currentShape.blocks[i];
 
-		if (state->shape.x + shapeBlock.x == 0) {
+		if (state->currentShape.x + shapeBlock.x == 0) {
 			return;
 		}
 
-		TetrisBlock_s leftGridBlock = TetrisGrid_get(
+		TetrisBlock leftGridBlock = TetrisGrid_get(
 			&state->grid,
-			state->shape.x + shapeBlock.x - 1,
-			state->shape.y + shapeBlock.y);
+			state->currentShape.x + shapeBlock.x - 1,
+			state->currentShape.y + shapeBlock.y);
 
 		if (leftGridBlock.color != 0) {
 			return;
 		}
 	}
 
-	state->shape.x--;
+	state->currentShape.x--;
 }
 
-void TetrisState_moveRight (TetrisState_s* state) {
+void TetrisState_moveRight (TetrisState* state) {
 	for (int i = 0; i < TETRIS_SHAPE_BLOCK_AMOUNT; i++) {
-		TetrisShapeBlock_s shapeBlock = state->shape.blocks[i];
+		TetrisShapeBlock shapeBlock = state->currentShape.blocks[i];
 
-		if (state->shape.x + shapeBlock.x == TETRIS_GRID_WIDTH - 1) {
+		if (state->currentShape.x + shapeBlock.x == TETRIS_GRID_WIDTH - 1) {
 			return;
 		}
 
-		TetrisBlock_s rightGridBlock = TetrisGrid_get(
+		TetrisBlock rightGridBlock = TetrisGrid_get(
 			&state->grid,
-			state->shape.x + shapeBlock.x + 1,
-			state->shape.y + shapeBlock.y);
+			state->currentShape.x + shapeBlock.x + 1,
+			state->currentShape.y + shapeBlock.y);
 
 		if (rightGridBlock.color != 0) {
 			return;
 		}
 	}
 
-	state->shape.x++;
+	state->currentShape.x++;
 }
 
-void TetrisState_rotate (TetrisState_s* state) {
-	TetrisShape_rotateCW(&state->shape);
+void TetrisState_rotate (TetrisState* state) {
+	TetrisShape_rotateCW(&state->currentShape);
 
-	char shouldUndo = TetrisShape_collides(&state->shape, &state->grid, 0, 0);
+	char shouldUndo = TetrisShape_collides(&state->currentShape, &state->grid, 0, 0);
 
 	// Undoing the changes by rotating 90 degress counter-clockwise
 	if (shouldUndo == 1) {
-		TetrisShape_rotateCCW(&state->shape);
+		TetrisShape_rotateCCW(&state->currentShape);
 	}
 }
 
-void TetrisState_changeShape (TetrisState_s* state, char shapeType) {
+void TetrisState_changeShape (TetrisState* state, char shapeType) {
+	// Yes, this is bad
 	if (shapeType == TETRIS_SHAPE_TYPE_I) {
-		state->shape.blocks[0] = (TetrisShapeBlock_s) { 0, -2 };
-		state->shape.blocks[1] = (TetrisShapeBlock_s) { 0, -1 };
-		state->shape.blocks[2] = (TetrisShapeBlock_s) { 0,  0 };
-		state->shape.blocks[3] = (TetrisShapeBlock_s) { 0,  1 };
-		state->shape.y = 2;
-		state->shape.color = TETRIS_SHAPE_TYPE_I + 1;
+		state->currentShape.blocks[0] = (TetrisShapeBlock) { 0, -2 };
+		state->currentShape.blocks[1] = (TetrisShapeBlock) { 0, -1 };
+		state->currentShape.blocks[2] = (TetrisShapeBlock) { 0,  0 };
+		state->currentShape.blocks[3] = (TetrisShapeBlock) { 0,  1 };
+		state->currentShape.y = 2;
+		state->currentShape.color = TETRIS_SHAPE_TYPE_I + 1;
 	} else if (shapeType == TETRIS_SHAPE_TYPE_O) {
-		state->shape.blocks[0] = (TetrisShapeBlock_s) { 0, 0 };
-		state->shape.blocks[1] = (TetrisShapeBlock_s) { 0, 1 };
-		state->shape.blocks[2] = (TetrisShapeBlock_s) { 1, 0 };
-		state->shape.blocks[3] = (TetrisShapeBlock_s) { 1, 1 };
-		state->shape.y = 0;
-		state->shape.color = TETRIS_SHAPE_TYPE_O + 1;
+		state->currentShape.blocks[0] = (TetrisShapeBlock) { 0, 0 };
+		state->currentShape.blocks[1] = (TetrisShapeBlock) { 0, 1 };
+		state->currentShape.blocks[2] = (TetrisShapeBlock) { 1, 0 };
+		state->currentShape.blocks[3] = (TetrisShapeBlock) { 1, 1 };
+		state->currentShape.y = 0;
+		state->currentShape.color = TETRIS_SHAPE_TYPE_O + 1;
 	} else if (shapeType == TETRIS_SHAPE_TYPE_S) {
-		state->shape.blocks[0] = (TetrisShapeBlock_s) {  0,  0 };
-		state->shape.blocks[1] = (TetrisShapeBlock_s) { -1,  1 };
-		state->shape.blocks[2] = (TetrisShapeBlock_s) {  0,  1 };
-		state->shape.blocks[3] = (TetrisShapeBlock_s) {  1,  0 };
-		state->shape.y = 0;
-		state->shape.color = TETRIS_SHAPE_TYPE_S + 1;
+		state->currentShape.blocks[0] = (TetrisShapeBlock) {  0,  0 };
+		state->currentShape.blocks[1] = (TetrisShapeBlock) { -1,  1 };
+		state->currentShape.blocks[2] = (TetrisShapeBlock) {  0,  1 };
+		state->currentShape.blocks[3] = (TetrisShapeBlock) {  1,  0 };
+		state->currentShape.y = 0;
+		state->currentShape.color = TETRIS_SHAPE_TYPE_S + 1;
 	} else if (shapeType == TETRIS_SHAPE_TYPE_Z) {
-		state->shape.blocks[0] = (TetrisShapeBlock_s) {  0,  0 };
-		state->shape.blocks[1] = (TetrisShapeBlock_s) { -1, -1 };
-		state->shape.blocks[2] = (TetrisShapeBlock_s) {  0, -1 };
-		state->shape.blocks[3] = (TetrisShapeBlock_s) {  1,  0 };
-		state->shape.y = 1;
-		state->shape.color = TETRIS_SHAPE_TYPE_Z + 1;
+		state->currentShape.blocks[0] = (TetrisShapeBlock) {  0,  0 };
+		state->currentShape.blocks[1] = (TetrisShapeBlock) { -1, -1 };
+		state->currentShape.blocks[2] = (TetrisShapeBlock) {  0, -1 };
+		state->currentShape.blocks[3] = (TetrisShapeBlock) {  1,  0 };
+		state->currentShape.y = 1;
+		state->currentShape.color = TETRIS_SHAPE_TYPE_Z + 1;
 	} else if (shapeType == TETRIS_SHAPE_TYPE_L) {
-		state->shape.blocks[0] = (TetrisShapeBlock_s) {  0,  0 };
-		state->shape.blocks[1] = (TetrisShapeBlock_s) {  0, -1 };
-		state->shape.blocks[2] = (TetrisShapeBlock_s) {  0,  1 };
-		state->shape.blocks[3] = (TetrisShapeBlock_s) {  1,  1 };
-		state->shape.y = 1;
-		state->shape.color = TETRIS_SHAPE_TYPE_L + 1;
+		state->currentShape.blocks[0] = (TetrisShapeBlock) {  0,  0 };
+		state->currentShape.blocks[1] = (TetrisShapeBlock) {  0, -1 };
+		state->currentShape.blocks[2] = (TetrisShapeBlock) {  0,  1 };
+		state->currentShape.blocks[3] = (TetrisShapeBlock) {  1,  1 };
+		state->currentShape.y = 1;
+		state->currentShape.color = TETRIS_SHAPE_TYPE_L + 1;
 	} else if (shapeType == TETRIS_SHAPE_TYPE_J) {
-		state->shape.blocks[0] = (TetrisShapeBlock_s) {  0,  0 };
-		state->shape.blocks[1] = (TetrisShapeBlock_s) {  0, -1 };
-		state->shape.blocks[2] = (TetrisShapeBlock_s) {  0,  1 };
-		state->shape.blocks[3] = (TetrisShapeBlock_s) { -1,  1 };
-		state->shape.y = 1;
-		state->shape.color = TETRIS_SHAPE_TYPE_J + 1;
+		state->currentShape.blocks[0] = (TetrisShapeBlock) {  0,  0 };
+		state->currentShape.blocks[1] = (TetrisShapeBlock) {  0, -1 };
+		state->currentShape.blocks[2] = (TetrisShapeBlock) {  0,  1 };
+		state->currentShape.blocks[3] = (TetrisShapeBlock) { -1,  1 };
+		state->currentShape.y = 1;
+		state->currentShape.color = TETRIS_SHAPE_TYPE_J + 1;
 	} else if (shapeType == TETRIS_SHAPE_TYPE_T) {
-		state->shape.blocks[0] = (TetrisShapeBlock_s) {  0,  0 };
-		state->shape.blocks[1] = (TetrisShapeBlock_s) { -1,  0 };
-		state->shape.blocks[2] = (TetrisShapeBlock_s) {  1,  0 };
-		state->shape.blocks[3] = (TetrisShapeBlock_s) {  0,  1 };
-		state->shape.y = 0;
-		state->shape.color = TETRIS_SHAPE_TYPE_T + 1;
+		state->currentShape.blocks[0] = (TetrisShapeBlock) {  0,  0 };
+		state->currentShape.blocks[1] = (TetrisShapeBlock) { -1,  0 };
+		state->currentShape.blocks[2] = (TetrisShapeBlock) {  1,  0 };
+		state->currentShape.blocks[3] = (TetrisShapeBlock) {  0,  1 };
+		state->currentShape.y = 0;
+		state->currentShape.color = TETRIS_SHAPE_TYPE_T + 1;
 	}
 
-	state->shape.type = shapeType;
+	state->currentShape.type = shapeType;
 }
 
-void TetrisState_update (TetrisState_s* state) {
-	char canGoBottom = !TetrisShape_collides(
-		&state->shape, &state->grid, 0, 1);
+void TetrisState_update (TetrisState* state) {
+	char canGoBottom = !TetrisShape_collides(&state->currentShape, &state->grid, 0, 1);
+	char isStuck = TetrisShape_collides(&state->currentShape, &state->grid, 0, 0);
 
 	if (canGoBottom) {
-		state->shape.y++;
+		state->currentShape.y++;
 		return;
 	}
-	
-	char isStuck = TetrisShape_collides(
-		&state->shape, &state->grid, 0, 0);
 	
 	if (isStuck) {
 		Toast_message(&toast, "Game Over", GAME_FPS_TARGET * 5);
 		TetrisState_stop(state);
 	}
 
-	TetrisShape_applyToGrid(&state->shape, &state->grid);
+	TetrisShape_applyToGrid(&state->currentShape, &state->grid);
 
 	int addScore = 0;
 	TetrisGrid_processLines(&state->grid, &addScore);
@@ -189,10 +187,10 @@ void TetrisState_update (TetrisState_s* state) {
 	
 	char shapeType = rand() % 7;
 	TetrisState_changeShape(state, shapeType);
-	state->shape.x = 3;
+	state->currentShape.x = 3;
 }
 
-void TetrisState_render (TetrisState_s* state) {
+void TetrisState_render (TetrisState* state) {
 	TetrisGrid_render(&state->grid);
-	TetrisShape_render(&state->shape);
+	TetrisShape_render(&state->currentShape);
 }

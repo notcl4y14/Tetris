@@ -20,8 +20,8 @@ SDL_Renderer* sdlRender;
 TTF_TextEngine* sdlTextEngine;
 TTF_Font* sdlFont;
 TTF_Text* sdlText;
-GameState_s gameState;
-TetrisState_s tetrisState;
+GameState gameState;
+TetrisState tetrisState;
 Toast toast;
 
 void update () {

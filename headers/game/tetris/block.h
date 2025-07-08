@@ -1,8 +1,8 @@
 #ifndef GAME_TETRIS_BLOCK_H
 #define GAME_TETRIS_BLOCK_H
 
-typedef struct TetrisBlock_s {
+typedef struct TetrisBlock {
 	char color;
-} TetrisBlock_s;
+} TetrisBlock;
 
 #endif

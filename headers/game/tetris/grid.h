@@ -11,21 +11,21 @@
 
 #include <game/tetris/block.h>
 
-typedef struct TetrisGrid_s {
-	TetrisBlock_s* blocks;
+typedef struct TetrisGrid {
+	TetrisBlock* blocks;
 	int width;
 	int height;
-} TetrisGrid_s;
+} TetrisGrid;
 
-TetrisGrid_s TetrisGrid_new (int w, int h);
-void TetrisGrid_init (TetrisGrid_s* grid, int w, int h);
-void TetrisGrid_free (TetrisGrid_s* grid);
-TetrisBlock_s TetrisGrid_get (TetrisGrid_s* grid, int x, int y);
-void TetrisGrid_set (TetrisGrid_s* grid, int x, int y, TetrisBlock_s block);
-void TetrisGrid_clear (TetrisGrid_s* grid);
-void TetrisGrid_processLines (TetrisGrid_s* grid, int* score);
-void TetrisGrid_fallLines (TetrisGrid_s* grid);
-void TetrisGrid_emptyLines (TetrisGrid_s* grid, int* score);
-void TetrisGrid_render (TetrisGrid_s* grid);
+TetrisGrid TetrisGrid_new (int w, int h);
+void TetrisGrid_init (TetrisGrid* grid, int w, int h);
+void TetrisGrid_free (TetrisGrid* grid);
+TetrisBlock TetrisGrid_get (TetrisGrid* grid, int x, int y);
+void TetrisGrid_set (TetrisGrid* grid, int x, int y, TetrisBlock block);
+void TetrisGrid_clear (TetrisGrid* grid);
+void TetrisGrid_processLines (TetrisGrid* grid, int* score);
+void TetrisGrid_fallLines (TetrisGrid* grid);
+void TetrisGrid_emptyLines (TetrisGrid* grid, int* score);
+void TetrisGrid_render (TetrisGrid* grid);
 
 #endif
